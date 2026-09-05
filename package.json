@@ -1,0 +1,11 @@
+{
+  "name": "englishactivities",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Interactive exam vocabulary practice: a generic retrieval engine plus swappable course packs.",
+  "scripts": {
+    "test": "node tests/srs.test.js && node tests/checker.test.js",
+    "start": "npx http-server -p 8080 -c-1"
+  },
+  "license": "UNLICENSED"
+}

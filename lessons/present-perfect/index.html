@@ -1,0 +1,721 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+</head>
+<body>
+<title>What Has Happened?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+:root{
+  --paper:#F3F6F6; --surface:#FFFFFF; --ink:#16212E; --muted:#56636F; --line:#D5DDE1;
+  --accent:#0D6680; --accent-soft:#DDEEF3; --on-accent:#FFFFFF;
+  --mark:#F6D45A; --mark-ink:#16212E;
+  --ok:#1F7447; --ok-soft:#E0F2E7; --bad:#B0372F; --bad-soft:#F9E3E0; --warn:#8C5A0B; --warn-soft:#F8EDD5;
+  --display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --mono:"JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --paper:#0F151B; --surface:#172029; --ink:#E6ECF0; --muted:#9BA8B3; --line:#2B3845;
+    --accent:#62C4DE; --accent-soft:#15323B; --on-accent:#0F151B;
+    --mark:#E8C548; --mark-ink:#0F151B;
+    --ok:#62CB8E; --ok-soft:#15301F; --bad:#F2827A; --bad-soft:#3B1D1B; --warn:#E6B25C; --warn-soft:#33270F;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --paper:#0F151B; --surface:#172029; --ink:#E6ECF0; --muted:#9BA8B3; --line:#2B3845;
+  --accent:#62C4DE; --accent-soft:#15323B; --on-accent:#0F151B;
+  --mark:#E8C548; --mark-ink:#0F151B;
+  --ok:#62CB8E; --ok-soft:#15301F; --bad:#F2827A; --bad-soft:#3B1D1B; --warn:#E6B25C; --warn-soft:#33270F;
+}
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.55;padding:0 16px}
+.wrap{max-width:760px;margin:0 auto;padding-block:28px 64px;display:flex;flex-direction:column;gap:40px}
+h1,h2,h3{font-family:var(--display);line-height:1.12;text-wrap:balance;margin:0}
+h1{font-size:clamp(2.3rem,7vw,3.5rem);font-weight:800;letter-spacing:-.02em}
+h2{font-size:1.65rem;font-weight:800;letter-spacing:-.01em}
+h3{font-size:1.1rem;font-weight:600}
+p{margin:0}
+.eyebrow{font-family:var(--mono);font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+mark.aux{background:var(--mark);color:var(--mark-ink);padding:0 .2em;border-radius:3px}
+.pp{text-decoration:underline;text-decoration-color:var(--accent);text-decoration-thickness:3px;text-underline-offset:3px}
+
+/* header */
+header{display:flex;flex-direction:column;gap:14px}
+.meta{display:flex;flex-wrap:wrap;gap:8px}
+.meta span{font-family:var(--mono);font-size:.78rem;border:1px solid var(--line);border-radius:999px;padding:3px 10px;color:var(--muted);background:var(--surface)}
+.lead{font-size:1.1rem;max-width:60ch}
+.namebox{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+.namebox label{font-weight:700}
+.namebox input{max-width:240px}
+
+/* timeline */
+.timeline{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:14px}
+.tl-sentence{font-family:var(--display);font-size:1.45rem;font-weight:600;text-align:center}
+.tl-row{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px}
+.tl-box{border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:4px}
+.tl-past{background:var(--paper);border:1px dashed var(--line)}
+.tl-now{background:var(--accent-soft);border:2px solid var(--accent)}
+.tl-arrow{font-family:var(--mono);color:var(--accent);font-size:1.4rem}
+.tl-note{font-size:.95rem;color:var(--muted);text-align:center}
+@media (max-width:520px){
+  .tl-row{grid-template-columns:1fr}
+  .tl-arrow{text-align:center;transform:rotate(90deg)}
+}
+
+/* nav */
+nav.parts{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--paper);padding-block:10px;margin-block:-10px;border-bottom:1px solid var(--line)}
+nav.parts ul{list-style:none;margin:0;padding:0;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
+nav.parts a{display:inline-flex;align-items:center;gap:6px;white-space:nowrap;font-family:var(--mono);font-size:.78rem;color:var(--ink);text-decoration:none;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 11px}
+nav.parts a.done{border-color:var(--ok);color:var(--ok)}
+nav.parts a.done::after{content:"✓"}
+
+/* sections */
+section{display:flex;flex-direction:column;gap:18px;scroll-margin-top:64px}
+.sec-head{display:flex;flex-direction:column;gap:6px}
+.task{color:var(--muted);max-width:62ch}
+.items{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.item{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+.item.is-ok{border-color:var(--ok)}
+.item.is-bad{border-color:var(--bad)}
+.item.is-warn{border-color:var(--warn)}
+.num{font-family:var(--mono);font-size:.8rem;color:var(--muted);min-width:1.6em}
+.line{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px}
+.verb{font-family:var(--mono);font-size:.82rem;color:var(--accent)}
+input[type=text],textarea,select{font:inherit;color:var(--ink);background:var(--paper);border:1.5px solid var(--line);border-radius:8px;padding:6px 10px;width:100%}
+input[type=text].sm{width:6.2em}
+input[type=text].md{width:8.5em}
+textarea{min-height:3.2em;resize:vertical}
+select{width:auto;padding-right:6px}
+input:focus-visible,textarea:focus-visible,select:focus-visible,button:focus-visible,a:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.fb{font-size:.95rem;border-radius:8px;padding:6px 10px}
+.fb:empty{display:none}
+.fb.ok{background:var(--ok-soft);color:var(--ok)}
+.fb.bad{background:var(--bad-soft);color:var(--bad)}
+.fb.warn{background:var(--warn-soft);color:var(--warn)}
+.fb.info{background:var(--accent-soft);color:var(--ink)}
+
+.actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+button{font:inherit;cursor:pointer;border-radius:999px;padding:8px 18px;border:1.5px solid var(--accent);background:transparent;color:var(--accent);font-weight:700}
+button.primary{background:var(--accent);color:var(--on-accent)}
+button:disabled{opacity:.5;cursor:default}
+.score{font-family:var(--mono);font-size:.9rem;font-weight:500}
+
+/* choices */
+.choices{display:flex;flex-wrap:wrap;gap:8px}
+.choice{padding:5px 14px;border-color:var(--line);color:var(--ink);font-weight:400}
+.choice[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft);font-weight:700}
+.choice.right{border-color:var(--ok);background:var(--ok-soft);color:var(--ok)}
+.choice.wrong{border-color:var(--bad);background:var(--bad-soft);color:var(--bad)}
+.gap{display:inline-block;min-width:4.5em;border-bottom:2px solid var(--ink);text-align:center;font-weight:700;color:var(--accent)}
+
+/* rule boxes */
+.rule{border-left:4px solid var(--mark);background:var(--surface);border-radius:0 12px 12px 0;padding:12px 16px;display:flex;flex-direction:column;gap:6px}
+.rule dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:4px 14px}
+.rule dt{font-family:var(--mono);font-weight:500}
+.rule dd{margin:0}
+.formula{font-family:var(--mono);font-size:1rem;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.formula span{border:1px solid var(--line);border-radius:6px;padding:2px 8px;background:var(--paper)}
+.formula span.hl{background:var(--mark);color:var(--mark-ink);border-color:var(--mark)}
+
+/* part 2 */
+.bank{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:8px}
+.bank li{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:8px 12px}
+.bank b{font-family:var(--mono);color:var(--accent);margin-right:6px}
+
+/* part 4 */
+.case{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:10px}
+.case-top{display:flex;gap:14px;align-items:flex-start}
+.clue{font-size:2rem;line-height:1;flex:none;width:3.2rem;height:3.2rem;display:grid;place-items:center;background:var(--paper);border-radius:10px}
+.models{margin:0;padding-left:1.2em;display:flex;flex-direction:column;gap:2px}
+
+/* part 5 */
+.yn{display:flex;gap:8px}
+.follow{border-top:1px dashed var(--line);padding-top:8px;display:flex;flex-direction:column;gap:6px}
+.follow .q{font-weight:700}
+
+/* final */
+.timer{font-family:var(--mono);font-size:2.4rem;font-weight:500;font-variant-numeric:tabular-nums;color:var(--accent)}
+.timer.low{color:var(--bad)}
+.starters{display:flex;flex-wrap:wrap;gap:6px}
+.starter{font-family:var(--mono);font-size:.82rem;padding:4px 10px;border-color:var(--line);color:var(--ink);font-weight:500}
+
+/* results */
+.results{background:var(--surface);border:2px solid var(--ink);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:12px}
+.results table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
+.results td{padding:6px 0;border-bottom:1px solid var(--line)}
+.results td:last-child{text-align:right;font-family:var(--mono)}
+#copyOut{font-family:var(--mono);font-size:.8rem;min-height:8em}
+footer{color:var(--muted);font-size:.85rem}
+@media (prefers-reduced-motion:no-preference){ .item,.fb{transition:border-color .2s, background-color .2s} }
+</style>
+
+<div class="wrap">
+
+<header>
+  <p class="eyebrow">Present Perfect Simple</p>
+  <h1>What Has Happened?</h1>
+  <div class="meta"><span>Level A2</span><span>25–30 minutes</span><span>6 parts</span></div>
+  <p class="lead">Today you practise talking about things that happened in the past and are important <b>now</b>. Every Present Perfect sentence has a result you can see today.</p>
+  <div class="namebox"><label for="studentName">Your name</label><input type="text" id="studentName" data-save placeholder="Write your name" autocomplete="given-name"></div>
+</header>
+
+<div class="timeline" aria-label="How the Present Perfect works">
+  <p class="tl-sentence">I <mark class="aux">have</mark> <span class="pp">lost</span> my keys.</p>
+  <div class="tl-row">
+    <div class="tl-box tl-past"><span class="eyebrow">Past · action</span><span>I lost my keys. (When? Not important.)</span></div>
+    <div class="tl-arrow" aria-hidden="true">→</div>
+    <div class="tl-box tl-now"><span class="eyebrow">Now · result</span><span>I can't open the door.</span></div>
+  </div>
+  <p class="tl-note">Present Perfect connects a past action with the situation now.</p>
+</div>
+
+<nav class="parts" aria-label="Parts">
+  <ul>
+    <li><a href="#part1" data-part="1">1 Build</a></li>
+    <li><a href="#part2" data-part="2">2 Result now</a></li>
+    <li><a href="#part3" data-part="3">3 Just · already · yet</a></li>
+    <li><a href="#part4" data-part="4">4 Detective</a></li>
+    <li><a href="#part5" data-part="5">5 Have you…?</a></li>
+    <li><a href="#final" data-part="6">Final 60s</a></li>
+    <li><a href="#results">Results</a></li>
+  </ul>
+</nav>
+
+<!-- PART 1 -->
+<section id="part1">
+  <div class="sec-head">
+    <p class="eyebrow">Part 1</p>
+    <h2>Build the sentence</h2>
+    <p class="task">Write <b>have</b> or <b>has</b> in the first box and the past participle of the verb in the second box.</p>
+  </div>
+  <ol class="items" id="p1list"></ol>
+  <div class="actions">
+    <button class="primary" type="button" id="p1check">Check my answers</button>
+    <button type="button" id="p1show">Show answers</button>
+    <span class="score" id="p1score" aria-live="polite"></span>
+  </div>
+  <div class="item" id="p1q">
+    <h3>Think: which words do we always need before the past participle?</h3>
+    <div class="choices" id="p1qChoices"></div>
+    <p class="fb" id="p1qFb" aria-live="polite"></p>
+  </div>
+  <div class="rule">
+    <p class="eyebrow">The form</p>
+    <div class="formula"><span>subject</span>+<span class="hl">have / has</span>+<span>past participle</span></div>
+    <dl>
+      <dt>have</dt><dd>I, you, we, they</dd>
+      <dt>has</dt><dd>he, she, it, one person (my wife, Edwin)</dd>
+    </dl>
+  </div>
+</section>
+
+<!-- PART 2 -->
+<section id="part2">
+  <div class="sec-head">
+    <p class="eyebrow">Part 2</p>
+    <h2>What is the situation now?</h2>
+    <p class="task">Match each result (1–5) with the correct sentence (A–E).</p>
+  </div>
+  <ul class="bank" id="p2bank"></ul>
+  <ol class="items" id="p2list"></ol>
+  <div class="actions">
+    <button class="primary" type="button" id="p2check">Check my answers</button>
+    <span class="score" id="p2score" aria-live="polite"></span>
+  </div>
+  <div class="rule">
+    <p class="eyebrow">Say it aloud</p>
+    <p>For each correct pair, read the sentence and then answer the question <b>“What is the result now?”</b></p>
+    <p><i>“He has lost his glasses.”</i> → <i>“He cannot find them now.”</i></p>
+  </div>
+</section>
+
+<!-- PART 3 -->
+<section id="part3">
+  <div class="sec-head">
+    <p class="eyebrow">Part 3</p>
+    <h2>Just, already or yet?</h2>
+    <p class="task">Tap the best word for each sentence. You see the answer immediately.</p>
+  </div>
+  <div class="rule">
+    <p class="eyebrow">Quick rule</p>
+    <dl>
+      <dt>JUST</dt><dd>a very short time ago</dd>
+      <dt>ALREADY</dt><dd>sooner than expected / it is done</dd>
+      <dt>YET</dt><dd>until now; normally in questions and negatives, at the end of the sentence</dd>
+    </dl>
+  </div>
+  <ol class="items" id="p3list"></ol>
+  <div class="actions"><span class="score" id="p3score" aria-live="polite"></span><button type="button" id="p3reset">Try again</button></div>
+</section>
+
+<!-- PART 4 -->
+<section id="part4">
+  <div class="sec-head">
+    <p class="eyebrow">Part 4</p>
+    <h2>Detective</h2>
+    <p class="task">Something has happened. Look at each situation and write what you think <b>has happened</b>. There are many good answers. Use has / have + past participle.</p>
+  </div>
+  <div id="p4list" style="display:flex;flex-direction:column;gap:12px"></div>
+</section>
+
+<!-- PART 5 -->
+<section id="part5">
+  <div class="sec-head">
+    <p class="eyebrow">Part 5</p>
+    <h2>Have you done it yet?</h2>
+    <p class="task">Answer about <b>your</b> day. Don't answer only “Yes” or “No”. Give the short answer and one full sentence.</p>
+  </div>
+  <div class="rule">
+    <p class="eyebrow">Answer like this</p>
+    <p><b>Yes, I have.</b> I've already had breakfast.</p>
+    <p><b>No, I haven't.</b> I haven't had breakfast yet.</p>
+  </div>
+  <ol class="items" id="p5list"></ol>
+  <div class="actions">
+    <button class="primary" type="button" id="p5check">Check my answers</button>
+    <span class="score" id="p5score" aria-live="polite"></span>
+  </div>
+  <p class="task">After a Yes answer, you get one more question in the <b>Past Simple</b> (did…?). Answer it too: the action is finished, so now we use the past.</p>
+</section>
+
+<!-- FINAL -->
+<section id="final">
+  <div class="sec-head">
+    <p class="eyebrow">Final challenge</p>
+    <h2>Five things in 60 seconds</h2>
+    <p class="task">Tell me five things that have happened today. Press start and write (or say, then write) as fast as you can.</p>
+  </div>
+  <div class="actions">
+    <button class="primary" type="button" id="fStart">Start 60 seconds</button>
+    <span class="timer" id="fTimer" aria-live="off">1:00</span>
+  </div>
+  <div class="starters" id="fStarters" aria-label="Sentence starters"></div>
+  <ol class="items" id="fList"></ol>
+  <div class="actions">
+    <button type="button" id="fAdd">Add a sentence</button>
+    <button class="primary" type="button" id="fCheck">Check my sentences</button>
+    <span class="score" id="fScore" aria-live="polite"></span>
+  </div>
+  <div class="rule">
+    <p class="eyebrow">Targets</p>
+    <dl>
+      <dt>Minimum</dt><dd>5 correct Present Perfect sentences</dd>
+      <dt>Stronger</dt><dd>5 sentences with extra details (who? where? what?)</dd>
+    </dl>
+    <p>Example: I've already had breakfast. I've checked my phone. I haven't gone out yet. I've spoken to my wife. I've learned some English today.</p>
+  </div>
+</section>
+
+<!-- RESULTS -->
+<section id="results">
+  <div class="results">
+    <p class="eyebrow">Finished?</p>
+    <h2>My results</h2>
+    <p class="task">Press the button, then copy the text and send it to your teacher.</p>
+    <div class="actions"><button class="primary" type="button" id="rMake">Show my results</button></div>
+    <div id="rBox" hidden>
+      <table><tbody id="rTable"></tbody></table>
+      <div class="actions" style="margin-top:12px"><button type="button" id="rCopy">Copy for my teacher</button><span class="score" id="rCopyMsg" aria-live="polite"></span></div>
+      <label class="eyebrow" for="copyOut" style="display:block;margin-top:10px">Text to send</label>
+      <textarea id="copyOut" readonly></textarea>
+    </div>
+  </div>
+</section>
+
+<footer>Your answers are saved on this device only. Based on the Present Perfect units in Murphy, <i>English Grammar in Use</i>.</footer>
+</div>
+
+<script>
+(function(){
+"use strict";
+var KEY="pp-what-has-happened-v1";
+var state={};
+try{ state=JSON.parse(localStorage.getItem(KEY)||"{}")||{}; }catch(e){ state={}; }
+function save(){ try{ localStorage.setItem(KEY,JSON.stringify(state)); }catch(e){} }
+function $(id){ return document.getElementById(id); }
+function el(tag,attrs,html){ var n=document.createElement(tag); if(attrs){for(var k in attrs){ if(k==="class") n.className=attrs[k]; else n.setAttribute(k,attrs[k]); }} if(html!=null) n.innerHTML=html; return n; }
+function norm(s){ return (s||"").toLowerCase().replace(/[’‘`]/g,"'").replace(/\s+/g," ").trim(); }
+function setFb(node,cls,msg){ node.className="fb"+(cls?" "+cls:""); node.innerHTML=msg||""; }
+function markItem(node,cls){ node.classList.remove("is-ok","is-bad","is-warn"); if(cls) node.classList.add(cls); }
+function markPart(n){ var a=document.querySelector('nav.parts a[data-part="'+n+'"]'); if(a) a.classList.add("done"); state["done"+n]=1; save(); }
+
+/* ---------- Present Perfect detector (Parts 4, 5, Final) ---------- */
+var IRREG_PP="been had done gone seen lost sent left made taken given eaten broken forgotten bought brought caught taught thought found got gotten heard held kept known met paid put read said sold shut spoken spent stolen stood told understood won written woken worn drunk driven ridden risen fallen flown grown thrown shown begun swum sung rung run come become fed felt fought built burnt learnt dreamt meant slept sat hung hit cut set let hurt cost spilt lent bent lit dealt chosen hidden forgiven taught ",PP={};
+IRREG_PP.split(" ").forEach(function(w){ if(w) PP[w]=1; });
+var PAST_TO_PP={went:"gone",saw:"seen",did:"done",ate:"eaten",broke:"broken",forgot:"forgotten",took:"taken",wrote:"written",spoke:"spoken",drank:"drunk",gave:"given",fell:"fallen",drove:"driven",woke:"woken",began:"begun",stole:"stolen",knew:"known",flew:"flown",grew:"grown",threw:"thrown",sang:"sung",swam:"swum",ran:"run",came:"come",became:"become",rang:"rung",rode:"ridden",wore:"worn",chose:"chosen",was:"been",were:"been"};
+var BASE_TO_PP={go:"gone",see:"seen","do":"done",lose:"lost",send:"sent",leave:"left",eat:"eaten",break:"broken",forget:"forgotten",buy:"bought",get:"got",take:"taken",make:"made",be:"been",write:"written",speak:"spoken",drink:"drunk",find:"found",give:"given",know:"known",meet:"met",pay:"paid",tell:"told",think:"thought",bring:"brought",win:"won",fall:"fallen",drive:"driven",sleep:"slept",wake:"woken",begin:"begun",steal:"stolen",hear:"heard",finish:"finished",receive:"received",drop:"dropped",spill:"spilled",check:"checked",watch:"watched",call:"called",clean:"cleaned",cook:"cooked",book:"booked",pack:"packed",learn:"learned",open:"opened",close:"closed",arrive:"arrived",study:"studied",prepare:"prepared",start:"started",work:"worked",play:"played",talk:"talked",walk:"walked",visit:"visited",use:"used",wash:"washed",stop:"stopped"};
+var SKIP={just:1,already:1,not:1,never:1,ever:1,also:1,recently:1,finally:1,all:1,both:1,only:1,still:1};
+var NOT_PP={a:1,an:1,the:1,my:1,your:1,his:1,her:1,our:1,their:1,some:1,any:1,to:1,no:1,got:0,breakfast:1,lunch:1,dinner:1,time:1,fun:1,it:1,this:1,that:1,two:1,one:1,many:1,much:1,lots:1};
+function tokens(text){
+  var t=norm(text)
+    .replace(/\b(\w+)'ve\b/g,"$1 have")
+    .replace(/\bhaven't\b/g,"have not").replace(/\bhasn't\b/g,"has not")
+    .replace(/\b(\w+)'s\b/g,"$1 _s");
+  return t.split(/[^a-z_']+/).filter(Boolean);
+}
+function isPP(w){ return !!PP[w] || (/ed$/.test(w) && w.length>3); }
+/* returns {ok:true} | {ok:false,msg} */
+function analyze(text){
+  var tk=tokens(text), firstErr=null, sawAux=false;
+  for(var i=0;i<tk.length;i++){
+    var w=tk[i]; if(w!=="have"&&w!=="has"&&w!=="_s") continue;
+    var j=i+1; while(j<tk.length && SKIP[tk[j]]) j++;
+    var v=tk[j]; if(!v) continue;
+    if(isPP(v)) return {ok:true};
+    if(w==="_s") continue;               /* he's happy = he is */
+    if(NOT_PP[v]) continue;              /* I have a car = have as a main verb */
+    sawAux=true;
+    if(!firstErr){
+      if(PAST_TO_PP[v]) firstErr="<b>"+v+"</b> is Past Simple. After has / have use the past participle: <b>"+PAST_TO_PP[v]+"</b>.";
+      else if(BASE_TO_PP[v]) firstErr="Use the past participle, not <b>"+v+"</b>. Try <b>"+BASE_TO_PP[v]+"</b>.";
+      else if(/ing$/.test(v)) firstErr="Don't use -ing here. Use the past participle (e.g. <b>finished</b>, <b>gone</b>).";
+    }
+  }
+  if(firstErr) return {ok:false,msg:firstErr};
+  if(sawAux) return {ok:false,msg:"Check the verb after has / have. It must be a past participle (finished, gone, seen…)."};
+  for(var m=0;m<tk.length;m++){ if(PAST_TO_PP[tk[m]]&&tk[m]!=="was"&&tk[m]!=="were") return {ok:false,msg:"<b>"+tk[m]+"</b> is Past Simple. Here use <b>has / have + "+PAST_TO_PP[tk[m]]+"</b>."}; }
+  return {ok:false,msg:"I can't see the Present Perfect. Use <b>has / have + past participle</b>."};
+}
+
+/* ---------- PART 1 ---------- */
+var P1=[
+  {s:"I",a:"have",pp:"lost",base:"lose",past:"lost",rest:"my keys."},
+  {s:"She",a:"has",pp:"sent",base:"send",past:"sent",rest:"the email."},
+  {s:"We",a:"have",pp:"finished",base:"finish",past:"finished",rest:"lunch."},
+  {s:"He",a:"has",pp:"left",base:"leave",past:"left",rest:"his phone at home."},
+  {s:"They",a:"have",pp:"solved",base:"solve",past:"solved",rest:"the problem."},
+  {s:"My wife",a:"has",pp:"gone",base:"go",past:"went",rest:"to the supermarket."},
+  {s:"I",a:"have",pp:"seen",base:"see",past:"saw",rest:"that movie before."},
+  {s:"Edwin",a:"has",pp:"done",base:"do",past:"did",rest:"his homework."}
+];
+var p1list=$("p1list");
+P1.forEach(function(q,i){
+  var li=el("li",{"class":"item"});
+  var line=el("div",{"class":"line"});
+  line.appendChild(el("span",{"class":"num"},(i+1)+"."));
+  line.appendChild(el("span",null,q.s));
+  var a=el("input",{type:"text","class":"sm",id:"p1a"+i,"data-save":"","aria-label":"Sentence "+(i+1)+": have or has",autocapitalize:"off",autocomplete:"off",spellcheck:"false"});
+  var p=el("input",{type:"text","class":"md",id:"p1p"+i,"data-save":"","aria-label":"Sentence "+(i+1)+": past participle of "+q.base,autocapitalize:"off",autocomplete:"off",spellcheck:"false"});
+  line.appendChild(a); line.appendChild(p);
+  line.appendChild(el("span",null,q.rest));
+  line.appendChild(el("span",{"class":"verb"},"("+q.base+")"));
+  li.appendChild(line);
+  li.appendChild(el("p",{"class":"fb",id:"p1fb"+i,"aria-live":"polite"}));
+  p1list.appendChild(li);
+});
+function gradeP1(){
+  return P1.map(function(q,i){
+    var a=norm($("p1a"+i).value), p=norm($("p1p"+i).value);
+    var aOk = a===q.a || (q.a==="have"&&a==="'ve") || (q.a==="has"&&a==="'s");
+    var pOk = p===q.pp;
+    var msg=[];
+    if(!a&&!p) return {ok:false,empty:true,msg:"Write your answer in both boxes."};
+    if(!aOk){ msg.push(q.a==="has" ? "<b>"+q.s+"</b> is one person (he / she) → <b>has</b>." : "With <b>"+q.s+"</b> we use <b>have</b>."); }
+    if(!pOk){
+      if(!p) msg.push("Write the past participle of <b>"+q.base+"</b>.");
+      else if(q.base==="go"&&p==="been") msg.push("<b>been</b> means she went and came back. She is still there → <b>gone</b>.");
+      else if(p===q.base) msg.push("Don't use the base form. <b>"+q.base+"</b> → past participle?");
+      else if(p===q.past) msg.push("<b>"+p+"</b> is Past Simple. The past participle is different. Try again.");
+      else if(p===q.base.replace(/e$/,"")+"ed" && q.pp.slice(-2)!=="ed") msg.push("<b>"+q.base+"</b> is irregular. It does not end in -ed.");
+      else msg.push("Check the spelling of the past participle of <b>"+q.base+"</b>.");
+    }
+    return {ok:aOk&&pOk,msg:msg.join(" ")};
+  });
+}
+$("p1check").addEventListener("click",function(){
+  var r=gradeP1(), n=0;
+  r.forEach(function(x,i){
+    var li=$("p1fb"+i).parentNode;
+    if(x.ok){ n++; markItem(li,"is-ok"); setFb($("p1fb"+i),"ok","Correct: "+P1[i].s+" <mark class='aux'>"+P1[i].a+"</mark> <span class='pp'>"+P1[i].pp+"</span> "+P1[i].rest); }
+    else { markItem(li,"is-bad"); setFb($("p1fb"+i),"bad",x.msg); }
+  });
+  $("p1score").textContent=n+" / 8 correct";
+  if(n===8) markPart(1);
+});
+$("p1show").addEventListener("click",function(){
+  P1.forEach(function(q,i){ var li=$("p1fb"+i).parentNode; if(!li.classList.contains("is-ok")){ markItem(li,"is-warn"); setFb($("p1fb"+i),"warn","Answer: "+q.s+" <mark class='aux'>"+q.a+"</mark> <span class='pp'>"+q.pp+"</span> "+q.rest); } });
+});
+/* the thinking question */
+var P1Q=[["did / does",0],["have / has",1],["was / were",0]];
+P1Q.forEach(function(c){
+  var b=el("button",{type:"button","class":"choice","aria-pressed":"false"},c[0]);
+  b.addEventListener("click",function(){
+    Array.prototype.forEach.call($("p1qChoices").children,function(x){ x.setAttribute("aria-pressed","false"); x.classList.remove("right","wrong"); });
+    b.setAttribute("aria-pressed","true");
+    if(c[1]){ b.classList.add("right"); setFb($("p1qFb"),"ok","Yes! We always need <b>have</b> or <b>has</b> before the past participle."); state.p1q=1; }
+    else { b.classList.add("wrong"); setFb($("p1qFb"),"bad","Not this one. Look at your sentences in Part 1 again."); state.p1q=0; }
+    save();
+  });
+  $("p1qChoices").appendChild(b);
+});
+
+/* ---------- PART 2 ---------- */
+var P2S=[["A","He has lost his glasses."],["B","She has finished the report."],["C","They have gone to the restaurant."],["D","I have broken my phone."],["E","We have cleaned the kitchen."]];
+var P2=[["The kitchen is clean now.","E"],["He cannot find them now.","A"],["The phone does not work properly now.","D"],["The report is ready now.","B"],["They are not here now.","C"]];
+P2S.forEach(function(s){ $("p2bank").appendChild(el("li",null,"<b>"+s[0]+"</b>"+s[1])); });
+P2.forEach(function(q,i){
+  var li=el("li",{"class":"item"}), line=el("div",{"class":"line"});
+  line.appendChild(el("span",{"class":"num"},(i+1)+"."));
+  var sel=el("select",{id:"p2s"+i,"data-save":"","aria-label":"Sentence for result "+(i+1)});
+  sel.appendChild(el("option",{value:""},"—"));
+  P2S.forEach(function(s){ sel.appendChild(el("option",{value:s[0]},s[0])); });
+  line.appendChild(sel);
+  line.appendChild(el("span",null,q[0]));
+  li.appendChild(line);
+  li.appendChild(el("p",{"class":"fb",id:"p2fb"+i,"aria-live":"polite"}));
+  $("p2list").appendChild(li);
+});
+function sentenceOf(letter){ for(var k=0;k<P2S.length;k++) if(P2S[k][0]===letter) return P2S[k][1]; return ""; }
+function gradeP2(){ return P2.map(function(q,i){ return {ok:$("p2s"+i).value===q[1]}; }); }
+$("p2check").addEventListener("click",function(){
+  var r=gradeP2(), n=0;
+  r.forEach(function(x,i){
+    var li=$("p2fb"+i).parentNode, v=$("p2s"+i).value;
+    if(x.ok){ n++; markItem(li,"is-ok"); setFb($("p2fb"+i),"ok","“"+sentenceOf(v)+"” → What is the result now? “"+P2[i][0]+"”"); }
+    else if(!v){ markItem(li,"is-bad"); setFb($("p2fb"+i),"bad","Choose a letter."); }
+    else { markItem(li,"is-bad"); setFb($("p2fb"+i),"bad","“"+sentenceOf(v)+"” does not explain this result. Try another letter."); }
+  });
+  $("p2score").textContent=n+" / 5 correct";
+  if(n===5) markPart(2);
+});
+
+/* ---------- PART 3 ---------- */
+var P3=[
+  {t:"I’ve ___ finished breakfast. It was delicious.",ok:["just"],alt:{already:"Possible, but “It was delicious” tells us it was a very short time ago. <b>just</b> is better."},why:"a very short time ago"},
+  {t:"Have you called your daughter ___?",ok:["yet"],why:"a question → yet, at the end"},
+  {t:"He hasn’t arrived ___.",ok:["yet"],why:"a negative → yet, at the end"},
+  {t:"We’ve ___ paid the bill. You don’t need to pay it.",ok:["already"],why:"it is done, sooner than you expected"},
+  {t:"She has ___ left the office. You missed her by two minutes.",ok:["just"],why:"two minutes ago = a very short time ago"},
+  {t:"Have they finished the meeting ___?",ok:["yet"],why:"a question → yet"},
+  {t:"I haven’t sent the message ___.",ok:["yet"],why:"a negative → yet"},
+  {t:"Edwin has ___ completed the first activity.",ok:["just","already"],why:"both are correct here: just = a moment ago, already = it is done"}
+];
+var WORDS=["just","already","yet"];
+function renderP3Item(i){
+  var q=P3[i], li=$("p3i"+i), pick=state["p3_"+i], fb=$("p3fb"+i);
+  var shown=q.t.replace("___","<span class='gap'>"+(pick||"&nbsp;")+"</span>");
+  li.querySelector(".stext").innerHTML=shown;
+  Array.prototype.forEach.call(li.querySelectorAll(".choice"),function(b){
+    var w=b.getAttribute("data-w"); b.classList.remove("right","wrong"); b.setAttribute("aria-pressed",w===pick?"true":"false");
+    if(w===pick) b.classList.add(q.ok.indexOf(w)>=0?"right":"wrong");
+  });
+  if(!pick){ markItem(li,null); setFb(fb,"",""); return; }
+  if(q.ok.indexOf(pick)>=0){ markItem(li,"is-ok"); setFb(fb,"ok","Correct: "+q.why+"."); }
+  else if(q.alt&&q.alt[pick]){ markItem(li,"is-warn"); setFb(fb,"warn",q.alt[pick]); }
+  else { markItem(li,"is-bad"); setFb(fb,"bad","Not quite. Read the quick rule and try another word."); }
+}
+P3.forEach(function(q,i){
+  var li=el("li",{"class":"item",id:"p3i"+i});
+  var line=el("div",{"class":"line"}); line.appendChild(el("span",{"class":"num"},(i+1)+".")); line.appendChild(el("span",{"class":"stext"}));
+  li.appendChild(line);
+  var ch=el("div",{"class":"choices"});
+  WORDS.forEach(function(w){
+    var b=el("button",{type:"button","class":"choice","data-w":w,"aria-pressed":"false"},w);
+    b.addEventListener("click",function(){ state["p3_"+i]=w; save(); renderP3Item(i); p3Score(); });
+    ch.appendChild(b);
+  });
+  li.appendChild(ch);
+  li.appendChild(el("p",{"class":"fb",id:"p3fb"+i,"aria-live":"polite"}));
+  $("p3list").appendChild(li);
+  renderP3Item(i);
+});
+function gradeP3(){ return P3.map(function(q,i){ return {ok:q.ok.indexOf(state["p3_"+i])>=0, pick:state["p3_"+i]||""}; }); }
+function p3Score(){ var r=gradeP3(), n=0, done=0; r.forEach(function(x){ if(x.ok)n++; if(x.pick)done++; }); $("p3score").textContent=done?n+" / 8 correct":""; if(n===8) markPart(3); }
+$("p3reset").addEventListener("click",function(){ P3.forEach(function(q,i){ delete state["p3_"+i]; renderP3Item(i); }); save(); p3Score(); });
+p3Score();
+
+/* ---------- PART 4 ---------- */
+var P4=[
+  {clue:"💧",t:"There is water all over the kitchen floor.",m:["Someone has spilled some water.","The washing machine has broken.","Someone has left the tap on."]},
+  {clue:"🔑",t:"A man is standing outside his house. He cannot get in.",m:["He has lost his keys.","He has forgotten his keys."]},
+  {clue:"🧳",t:"A woman is smiling. She is holding a suitcase and her passport.",m:["She has booked a trip.","She has bought a ticket.","She has packed her suitcase.","She has prepared everything for her trip."]},
+  {clue:"🍽️",t:"There is no food on the table, only dirty plates everywhere.",m:["They have finished dinner.","They have eaten everything."]},
+  {clue:"📱",t:"A man is looking at his phone and smiling.",m:["He has received good news.","Someone has sent him a message."]}
+];
+P4.forEach(function(c,i){
+  var box=el("div",{"class":"case",id:"p4c"+i});
+  var top=el("div",{"class":"case-top"});
+  top.appendChild(el("div",{"class":"clue","aria-hidden":"true"},c.clue));
+  top.appendChild(el("div",null,"<p class='eyebrow'>Situation "+(i+1)+"</p><p><b>"+c.t+"</b></p>"));
+  box.appendChild(top);
+  box.appendChild(el("label",{"for":"p4t"+i,"class":"eyebrow"},"What has happened?"));
+  box.appendChild(el("textarea",{id:"p4t"+i,"data-save":"",rows:"2",placeholder:"Someone has…"}));
+  var act=el("div",{"class":"actions"});
+  var bc=el("button",{type:"button","class":"primary"},"Check");
+  var bm=el("button",{type:"button"},"See possible answers");
+  act.appendChild(bc); act.appendChild(bm); box.appendChild(act);
+  var fb=el("p",{"class":"fb",id:"p4fb"+i,"aria-live":"polite"}); box.appendChild(fb);
+  var models=el("div",{hidden:""}); models.innerHTML="<p class='eyebrow'>Possible answers</p><ul class='models'>"+c.m.map(function(s){return "<li>"+s+"</li>";}).join("")+"</ul><p class='task'>Other logical answers are good too.</p>";
+  box.appendChild(models);
+  bc.addEventListener("click",function(){
+    var v=$("p4t"+i).value;
+    if(!norm(v)){ setFb(fb,"bad","Write your idea first."); return; }
+    var r=analyze(v);
+    if(r.ok){ setFb(fb,"ok","Good detective work! That is a Present Perfect sentence. Now say it aloud."); box.style.borderColor="var(--ok)"; }
+    else { setFb(fb,"bad",r.msg); box.style.borderColor="var(--bad)"; }
+    if(gradeP4().filter(function(x){return x.ok;}).length===5) markPart(4);
+  });
+  bm.addEventListener("click",function(){ models.hidden=!models.hidden; bm.textContent=models.hidden?"See possible answers":"Hide possible answers"; });
+  $("p4list").appendChild(box);
+});
+function gradeP4(){ return P4.map(function(c,i){ var v=$("p4t"+i).value; return {ok:!!norm(v)&&analyze(v).ok, text:v}; }); }
+
+/* ---------- PART 5 ---------- */
+var P5=[
+  {q:"Have you had breakfast yet?",v:"had breakfast",f:"What did you eat?",fm:"I ate eggs and bread."},
+  {q:"Have you checked your phone today?",v:"checked my phone",f:"What time did you check it?",fm:"I checked it at seven o'clock."},
+  {q:"Have you spoken to your family today?",v:"spoken to my family",f:"Who did you speak to?",fm:"I spoke to my wife."},
+  {q:"Have you watched TV today?",v:"watched TV",f:"What did you watch?",fm:"I watched the news."},
+  {q:"Have you been for a walk today?",v:"been for a walk",f:"Where did you go?",fm:"I went to the park."},
+  {q:"Have you read anything today?",v:"read anything",vy:"read the news",f:"What did you read?",fm:"I read an article about football."},
+  {q:"Have you learned something new today?",v:"learned anything new",vy:"learned something new",f:"What did you learn?",fm:"I learned a new English word."},
+  {q:"Have you sent any messages today?",v:"sent any messages",vy:"sent some messages",f:"Who did you send them to?",fm:"I sent them to my friends."}
+];
+P5.forEach(function(x,i){
+  var li=el("li",{"class":"item",id:"p5i"+i});
+  li.appendChild(el("div",{"class":"line"},"<span class='num'>"+(i+1)+".</span><b>"+x.q+"</b>"));
+  var yn=el("div",{"class":"yn"});
+  ["yes","no"].forEach(function(w){
+    var b=el("button",{type:"button","class":"choice","data-yn":w,"aria-pressed":"false"},w==="yes"?"Yes, I have.":"No, I haven't.");
+    b.addEventListener("click",function(){ state["p5yn_"+i]=w; save(); renderYN(i); });
+    yn.appendChild(b);
+  });
+  li.appendChild(yn);
+  li.appendChild(el("textarea",{id:"p5t"+i,"data-save":"",rows:"2","aria-label":"Your full answer to: "+x.q,placeholder:"Yes, I have. I've… / No, I haven't. I haven't… yet."}));
+  li.appendChild(el("p",{"class":"fb",id:"p5fb"+i,"aria-live":"polite"}));
+  var fol=el("div",{"class":"follow",id:"p5f"+i,hidden:""});
+  fol.innerHTML="<p class='q'>"+x.f+"</p><input type='text' id='p5fu"+i+"' data-save aria-label='"+x.f.replace(/'/g,"&#39;")+"' placeholder='Past Simple: I …'><p class='task'>Example: "+x.fm+"</p>";
+  li.appendChild(fol);
+  $("p5list").appendChild(li);
+});
+function renderYN(i){
+  var pick=state["p5yn_"+i];
+  Array.prototype.forEach.call($("p5i"+i).querySelectorAll("[data-yn]"),function(b){ b.setAttribute("aria-pressed",b.getAttribute("data-yn")===pick?"true":"false"); });
+  var t=$("p5t"+i);
+  var pre={yes:"Yes, I have. ",no:"No, I haven't. "};
+  if(pick&&(!norm(t.value)||t.value===pre[pick==="yes"?"no":"yes"])){ t.value=pre[pick]; state[t.id]=t.value; save(); }
+}
+function gradeP5One(i){
+  var x=P5[i], t=norm($("p5t"+i).value);
+  if(!t) return {ok:false,msg:"Write your answer."};
+  var yes=/^yes,? i( have|'ve)\b/.test(t)&&!/^yes,? i have not\b/.test(t), no=/^no,? i haven't\b/.test(t)||/^no,? i have not\b/.test(t);
+  var modelY="Yes, I have. I've "+(x.vy||x.v)+(i===0?" already":"")+".", modelN="No, I haven't. I haven't "+x.v+" yet.";
+  if(i===0) modelY="Yes, I have. I've already had breakfast.";
+  if(!yes&&!no) return {ok:false,msg:"Start with a short answer: <b>Yes, I have.</b> or <b>No, I haven't.</b>"};
+  var restTxt=t.replace(/^(yes|no),? i( have not| haven't| have|'ve)\b\.?/,"");
+  var tk=tokens(restTxt);
+  if(tk.length<3) return {ok:false,msg:"Good start. Now add a full sentence, for example: <i>"+(yes?modelY:modelN).replace(/^(Yes, I have\.|No, I haven't\.) /,"")+"</i>"};
+  var r=analyze(restTxt);
+  if(!r.ok) return {ok:false,msg:r.msg};
+  if(no && tk.indexOf("not")<0) return {ok:false,msg:"You said No, so the sentence must be negative: <i>"+modelN.replace("No, I haven't. ","")+"</i>"};
+  if(yes && tk.indexOf("not")>=0) return {ok:false,msg:"You said Yes, so the sentence must be positive: <i>"+modelY.replace("Yes, I have. ","")+"</i>"};
+  return {ok:true,yes:yes};
+}
+function gradeP5(){ return P5.map(function(x,i){ return gradeP5One(i); }); }
+$("p5check").addEventListener("click",function(){
+  var n=0;
+  gradeP5().forEach(function(r,i){
+    var li=$("p5i"+i);
+    if(r.ok){ n++; markItem(li,"is-ok"); setFb($("p5fb"+i),"ok","Great answer!"+(r.yes?" Now answer the next question in the Past Simple.":"")); $("p5f"+i).hidden=!r.yes; }
+    else { markItem(li,"is-bad"); setFb($("p5fb"+i),"bad",r.msg); $("p5f"+i).hidden=true; }
+  });
+  $("p5score").textContent=n+" / 8 correct";
+  if(n===8) markPart(5);
+});
+
+/* ---------- FINAL ---------- */
+var STARTERS=[["I've already…","I've already "],["I've just…","I've just "],["I haven't … yet.","I haven't  yet.",10],["My wife has…","My wife has "],["My friend has…","My friend has "],["Someone has…","Someone has "]];
+var lastFocus=null;
+function addLine(val){
+  var i=$("fList").children.length;
+  var li=el("li",{"class":"item"});
+  li.appendChild(el("div",{"class":"line"},"<span class='num'>"+(i+1)+".</span>"));
+  var inp=el("input",{type:"text",id:"f"+i,"data-save":"","aria-label":"Sentence "+(i+1),autocomplete:"off"});
+  if(val) inp.value=val;
+  inp.addEventListener("focus",function(){ lastFocus=inp; });
+  bindSave(inp); inp._b=true;
+  li.querySelector(".line").appendChild(inp);
+  li.appendChild(el("p",{"class":"fb",id:"ffb"+i,"aria-live":"polite"}));
+  $("fList").appendChild(li);
+  return inp;
+}
+var nLines=Math.max(5,state.fLines||5);
+for(var k=0;k<nLines;k++) addLine();
+STARTERS.forEach(function(s){
+  var b=el("button",{type:"button","class":"starter"},s[0]);
+  b.addEventListener("click",function(){
+    var target=(lastFocus&&!norm(lastFocus.value))?lastFocus:null;
+    if(!target){ var list=$("fList").querySelectorAll("input"); for(var j=0;j<list.length;j++){ if(!norm(list[j].value)){ target=list[j]; break; } } }
+    if(!target){ target=addLine(); state.fLines=$("fList").children.length; }
+    target.value=s[1]; target.focus();
+    var pos=s[2]||s[1].length; try{ target.setSelectionRange(pos,pos); }catch(e){}
+    state[target.id]=target.value; save();
+  });
+  $("fStarters").appendChild(b);
+});
+$("fAdd").addEventListener("click",function(){ var inp=addLine(); state.fLines=$("fList").children.length; save(); inp.focus(); });
+var timerId=null, left=60;
+function showTime(){ $("fTimer").textContent=Math.floor(left/60)+":"+("0"+(left%60)).slice(-2); $("fTimer").classList.toggle("low",left<=10); }
+$("fStart").addEventListener("click",function(){
+  if(timerId){ clearInterval(timerId); timerId=null; $("fStart").textContent="Start 60 seconds"; return; }
+  left=60; showTime(); $("fStart").textContent="Stop"; $("f0").focus();
+  timerId=setInterval(function(){ left--; showTime(); if(left<=0){ clearInterval(timerId); timerId=null; $("fStart").textContent="Start again"; $("fTimer").textContent="Time!"; } },1000);
+});
+function gradeF(){
+  var out=[], list=$("fList").querySelectorAll("input");
+  for(var i=0;i<list.length;i++){ var v=list[i].value; if(!norm(v)) { out.push({empty:true}); continue; } var r=analyze(v); out.push({ok:r.ok,msg:r.msg,detail:r.ok&&tokens(v).length>=6,text:v}); }
+  return out;
+}
+$("fCheck").addEventListener("click",function(){
+  var r=gradeF(), n=0, d=0;
+  r.forEach(function(x,i){
+    var li=$("ffb"+i).parentNode;
+    if(x.empty){ markItem(li,null); setFb($("ffb"+i),"",""); return; }
+    if(x.ok){ n++; if(x.detail)d++; markItem(li,"is-ok"); setFb($("ffb"+i),"ok",x.detail?"Correct, with details.":"Correct. Can you add a detail? (who, where, what)"); }
+    else { markItem(li,"is-bad"); setFb($("ffb"+i),"bad",x.msg); }
+  });
+  var msg=n+" correct sentences";
+  if(n>=5&&d>=5) msg+=" · Stronger target reached!"; else if(n>=5) msg+=" · Minimum target reached!"; else msg+=" · Target: 5";
+  $("fScore").textContent=msg;
+  if(n>=5) markPart(6);
+});
+
+/* ---------- RESULTS ---------- */
+$("rMake").addEventListener("click",function(){
+  var c=function(arr){ return arr.filter(function(x){return x.ok;}).length; };
+  var p1=c(gradeP1()), p2=c(gradeP2()), p3=c(gradeP3()), p4=c(gradeP4()), p5=c(gradeP5()), f=c(gradeF());
+  var rows=[["Part 1 · Build the sentence",p1+" / 8"],["Part 2 · Result now",p2+" / 5"],["Part 3 · Just, already, yet",p3+" / 8"],["Part 4 · Detective",p4+" / 5"],["Part 5 · Have you…?",p5+" / 8"],["Final challenge",f+" sentences"]];
+  $("rTable").innerHTML=rows.map(function(r){ return "<tr><td>"+r[0]+"</td><td>"+r[1]+"</td></tr>"; }).join("");
+  var name=$("studentName").value.trim()||"(no name)";
+  var txt="Present Perfect – What Has Happened?\nStudent: "+name+"\n\n"+rows.map(function(r){return r[0]+": "+r[1];}).join("\n");
+  txt+="\n\nDetective:\n"+P4.map(function(c,i){ return (i+1)+". "+($("p4t"+i).value.trim()||"-"); }).join("\n");
+  txt+="\n\nHave you…?\n"+P5.map(function(x,i){ var fu=$("p5fu"+i).value.trim(); return (i+1)+". "+($("p5t"+i).value.trim()||"-")+(fu?" / "+fu:""); }).join("\n");
+  var fs=[]; Array.prototype.forEach.call($("fList").querySelectorAll("input"),function(inp){ if(inp.value.trim()) fs.push("- "+inp.value.trim()); });
+  txt+="\n\nFinal challenge:\n"+(fs.join("\n")||"-");
+  $("copyOut").value=txt; $("rBox").hidden=false; $("rCopyMsg").textContent="";
+});
+$("rCopy").addEventListener("click",function(){
+  var t=$("copyOut").value;
+  function fallback(){ $("copyOut").focus(); $("copyOut").select(); $("rCopyMsg").textContent="Text selected. Copy it and send it to your teacher."; }
+  try{ navigator.clipboard.writeText(t).then(function(){ $("rCopyMsg").textContent="Copied. Paste it in a message to your teacher."; },fallback); }catch(e){ fallback(); }
+});
+
+/* ---------- save / restore ---------- */
+function bindSave(n){ n.addEventListener("input",function(){ state[n.id]=n.value; save(); }); n.addEventListener("change",function(){ state[n.id]=n.value; save(); }); }
+Array.prototype.forEach.call(document.querySelectorAll("[data-save]"),function(n){ if(state[n.id]!=null) n.value=state[n.id]; if(!n._b){ bindSave(n); n._b=true; } });
+P5.forEach(function(x,i){ if(state["p5yn_"+i]) renderYN(i); });
+if(state.p1q!=null){ var bs=$("p1qChoices").children; bs[state.p1q?1:0].click(); }
+for(var d=1;d<=6;d++) if(state["done"+d]){ var a=document.querySelector('nav.parts a[data-part="'+d+'"]'); if(a) a.classList.add("done"); }
+})();
+</script>
+
+</body>
+</html>
